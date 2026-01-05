@@ -86,8 +86,8 @@ website for selling exam papers and notes
 
 <section class="container" id="contact">
   <h2>Contact</h2>
-  <p>Email: studyvault@gmail.com</p>
-  <p>WhatsApp: +254 7XX XXX XXX</p>
+  <p>Email: muthonijulie90@gmail.com</p>
+  <p>WhatsApp: +254 758 504991</p>
 </section>
 
 <footer>
