@@ -43,30 +43,30 @@ index.html
     <div class="card">
       <h3>Math 120 – Past Papers</h3>
       <p>Past exams with solutions</p>
-      <p class="price">KES 100</p>
-      <button onclick="addToCart('Math 120',100)">Add to Cart</button>
+      <p class="price">KES 300</p>
+      <button onclick="addToCart('Math 120',300)">Add to Cart</button>
     </div>
     <div class="card">
       <h3>Physics 113 – Notes</h3>
       <p>Concise revision notes</p>
-      <p class="price">KES 100</p>
-      <button onclick="addToCart('Physics 113',100)">Add to Cart</button>
+      <p class="price">KES 250</p>
+      <button onclick="addToCart('Physics 113',250)">Add to Cart</button>
     </div>
     <div class="card">
-      <h3>ACS 113 – notes</h3>
-      <p>Notes </p>
-      <p class="price">KES 100</p>
-      <button onclick="addToCart('ACS 113',100)">Add to Cart</button>
+      <h3>ACS 113 – Full Pack</h3>
+      <p>Notes + Past Papers</p>
+      <p class="price">KES 400</p>
+      <button onclick="addToCart('ACS 113',400)">Add to Cart</button>
     </div>
   </div>
 </section>
 
 <section class="container" id="login">
-  <h2>User Login</h2>
-  <input type="email" placeholder="Email" />
-  <input type="password" placeholder="Password" />
-  <button onclick="alert('Demo login successful')">Login</button>
-  <p><i>(Demo login – backend needed for real users)</i></p>
+  <h2>User Login / Signup</h2>
+  <input type="email" id="email" placeholder="Email" />
+  <input type="password" id="password" placeholder="Password" />
+  <button onclick="signup(document.getElementById('email').value, document.getElementById('password').value)">Sign Up</button>
+  <button onclick="login(document.getElementById('email').value, document.getElementById('password').value)">Login</button>
 </section>
 
 <section class="container" id="cart">
@@ -79,39 +79,97 @@ index.html
 <section class="container hidden" id="download">
   <h2>Downloads</h2>
   <p>Payment successful. Download your files:</p>
-  <ul>
-    <li><a href="#">Math120.pdf</a></li>
-    <li><a href="#">Physics113.pdf</a></li>
-  </ul>
+  <ul id="downloadList"></ul>
 </section>
 
 <section class="container" id="contact">
   <h2>Contact</h2>
-  <p>Email: muthonijulie90@gmail.com</p>
-  <p>WhatsApp: +254 758 504991</p>
+  <p>Email: studyvault@gmail.com</p>
+  <p>WhatsApp: +254 7XX XXX XXX</p>
 </section>
 
 <footer>
   <p>&copy; 2026 StudyVault</p>
 </footer>
 
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js"></script>
+
 <script>
+  // Firebase config (replace with your config)
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "studyvault.firebaseapp.com",
+    projectId: "studyvault",
+    storageBucket: "studyvault.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  const app = firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const storage = firebase.storage();
+
+  // Signup
+  function signup(email, password){
+    auth.createUserWithEmailAndPassword(email, password)
+      .then(userCredential => { alert('Signup successful'); })
+      .catch(error => alert(error.message));
+  }
+
+  // Login
+  function login(email, password){
+    auth.signInWithEmailAndPassword(email, password)
+      .then(userCredential => { alert('Login successful'); })
+      .catch(error => alert(error.message));
+  }
+
+  // Cart
   let total = 0;
+  let cart = [];
   function addToCart(item, price) {
-    const li = document.createElement('li');
-    li.textContent = item + ' - KES ' + price;
-    document.getElementById('cartItems').appendChild(li);
+    cart.push({item, price});
     total += price;
+    document.getElementById('cartItems').innerHTML = '';
+    cart.forEach(c => {
+      const li = document.createElement('li');
+      li.textContent = c.item + ' - KES ' + c.price;
+      document.getElementById('cartItems').appendChild(li);
+    });
     document.getElementById('total').textContent = total;
   }
 
+  // M-Pesa Payment (Demo)
   function payMpesa() {
-    if (total === 0) {
-      alert('Cart is empty');
-      return;
-    }
-    alert('M-Pesa STK Push sent (demo)');
+    if(total === 0){ alert('Cart is empty'); return; }
+    alert('M-Pesa STK Push sent!'); // Replace with real API call later
+    showDownloads();
     document.getElementById('download').classList.remove('hidden');
+  }
+
+  // Show downloads after payment
+  function showDownloads(){
+    const downloadList = document.getElementById('downloadList');
+    downloadList.innerHTML = '';
+    cart.forEach(c => {
+      let path = c.item.replace(/\s/g,'') + '.pdf'; // Example: Math120.pdf
+      storage.ref(path).getDownloadURL()
+        .then(url => {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = url;
+          a.target = '_blank';
+          a.textContent = c.item + ' Download';
+          li.appendChild(a);
+          downloadList.appendChild(li);
+        }).catch(()=>{
+          const li = document.createElement('li');
+          li.textContent = c.item + ' (File not available yet)';
+          downloadList.appendChild(li);
+        });
+    });
   }
 </script>
 
